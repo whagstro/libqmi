@@ -318,6 +318,7 @@ get_signal_info_ready (QmiClientNas *client,
     gint16 rsrp;
     gint16 snr;
     gint8 rscp;
+    gint16 rsrq_5g;
 
     output = qmi_client_nas_get_signal_info_finish (client, res, &error);
     if (!output) {
@@ -419,6 +420,26 @@ get_signal_info_ready (QmiClientNas *client,
         g_print ("TDMA:\n"
                  "\tRSCP: '%d dBm'\n",
                  rscp);
+    }
+
+    /* 5G, values of -32768 in EN-DC mode indicate the modem is not connected... */
+    if (qmi_message_nas_get_signal_info_output_get_5g_signal_strength (output,
+                                                                        &rsrp,
+                                                                        &snr,
+                                                                        NULL)) {
+        g_print ("5G:\n"
+                 "\tRSRP: '%d dBm'\n"
+                 "\tSNR: '%.1lf dB'\n",
+                 rsrp,
+                 (0.1) * ((gdouble)snr));
+    }
+
+    /* 5G extended... */
+    if (qmi_message_nas_get_signal_info_output_get_5g_signal_strength_extended (output,
+                                                                        &rsrq_5g,
+                                                                        NULL)) {
+        g_print ("\tRSRQ: '%d dB'\n",
+                 rsrq_5g);
     }
 
     qmi_message_nas_get_signal_info_output_unref (output);
